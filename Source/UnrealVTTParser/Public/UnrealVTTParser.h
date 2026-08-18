@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
 
-class FTestPluginModule : public IModuleInterface
+class FUnrealVTTParserModule : public IModuleInterface
 {
 public:
 	/** IModuleInterface implementation */

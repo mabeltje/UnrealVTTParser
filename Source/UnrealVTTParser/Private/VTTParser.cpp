@@ -3,7 +3,34 @@
 #include "IDesktopPlatform.h"
 #include "HAL/FileManager.h"
 #include "Framework/Application/SlateApplication.h"
+#include "Sections/MovieSceneSkeletalAnimationSection.h"
 
+void UVTTParser::SetAnimationAsset(
+	UMovieSceneSkeletalAnimationSection* Section,
+	UAnimSequenceBase* Animation)
+{
+	if (!Section || !Animation)
+	{
+		return;
+	}
+
+	Section->Params.Animation = Animation;
+	Section->Modify(true);
+
+	return;
+}
+
+FSectionLabelEntry UVTTParser::CreateSectionLabelEntry(
+	UMovieSceneSection* Section,
+	const FString& Label)
+{
+	FSectionLabelEntry Entry;
+
+	Entry.Section = Section;
+	Entry.Label = Label;
+
+	return Entry;
+}
 
 float UVTTParser::ConvertVTTTimestampToSeconds(const FString& Timestamp)
 {
@@ -27,6 +54,11 @@ float UVTTParser::ConvertVTTTimestampToSeconds(const FString& Timestamp)
 	}
 
 	return (Hours * 3600.0f) + (Minutes * 60.0f) + Seconds;
+}
+
+FFrameNumber UVTTParser::GetFrameFromSeconds(const FFrameRate FrameRate, float Seconds)
+{
+	return FrameRate.AsFrameTime(Seconds).RoundToFrame();
 }
 
 bool UVTTParser::ParseVTTFile(const FString& FilePath, TArray<FVTTEntry>& OutEntries)
