@@ -2,22 +2,11 @@
 
 An Unreal Engine plugin for parsing VTT subtitle files and integrating them with the Sequencer and Movie Scene system.
 
----
 
 ## Overview
 
 UnrealVTTParser provides a Blueprint-callable API for working with VTT subtitle files in Unreal Engine. Parse subtitle data, convert timestamps to frame numbers, and map entries to Sequencer sections without directly interacting with low-level parsing logic.
 
----
-
-## Installation
-
-1. Place the `UnrealVTTParser` folder in your project's `Plugins/` directory.
-2. Regenerate Visual Studio project files.
-3. Rebuild the project.
-4. Enable the plugin in Unreal Editor: **Edit > Plugins** → Search for **UnrealVTTParser** → Check **Enable**.
-
----
 
 ## API Overview
 
@@ -28,7 +17,6 @@ UnrealVTTParser provides a Blueprint-callable API for working with VTT subtitle 
 | **Sequencer** | `CreateSectionLabelEntry(UMovieSceneSection* Section, const FString& Label)` | Pairs a Movie Scene section with a string label into an `FSectionLabelEntry` struct. |
 | **Sequencer** | `SetAnimationAsset(UMovieSceneSkeletalAnimationSection* Section, UAnimSequenceBase* Animation)` | Sets an animation sequence asset on a skeletal animation section. |
 
----
 
 ## Data Structures
 
@@ -76,3 +64,11 @@ struct FSectionLabelEntry
     FString Label;
 };
 ```
+
+## Installation
+
+1. Place the `UnrealVTTParser` folder in your project's `Plugins/` directory.
+2. Regenerate Visual Studio project files.
+3. Rebuild the project.
+4. Enable the plugin in Unreal Editor: **Edit > Plugins** → Search for **UnrealVTTParser** → Check **Enable**.
+
