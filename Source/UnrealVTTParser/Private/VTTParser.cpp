@@ -2,34 +2,59 @@
 #include "DesktopPlatformModule.h"
 #include "IDesktopPlatform.h"
 #include "HAL/FileManager.h"
+#include "MovieScene.h"
+#include "LevelSequence.h"
 #include "Framework/Application/SlateApplication.h"
-#include "Sections/MovieSceneSkeletalAnimationSection.h"
 
-void UVTTParser::SetAnimationAsset(
-	UMovieSceneSkeletalAnimationSection* Section,
-	UAnimSequenceBase* Animation)
+
+ TArray<FMovieSceneMarkedFrame> UVTTParser::AddVTTEntryMarkers(
+     ULevelSequence* Sequence, 
+     const FFrameNumber StartFrame, 
+     const FFrameNumber EndFrame, 
+     const FString& GlossLabel)
+ {
+     if (!Sequence)
+     {
+         return TArray<FMovieSceneMarkedFrame>();
+     }
+
+	 UMovieScene* MovieScene = Sequence->GetMovieScene();
+	 if (!MovieScene)
+	 {
+		 return TArray<FMovieSceneMarkedFrame>();
+	 }
+
+	 FFrameRate DisplayRate = MovieScene->GetDisplayRate();
+	 FFrameRate TickResolution = MovieScene->GetTickResolution();
+
+	 FFrameNumber StartTick = FFrameRate::TransformTime(FFrameTime(StartFrame), DisplayRate, TickResolution).FloorToFrame();
+	 FFrameNumber EndTick = FFrameRate::TransformTime(FFrameTime(EndFrame), DisplayRate, TickResolution).FloorToFrame();
+
+	 MovieScene->Modify();
+
+	 FMovieSceneMarkedFrame StartMark(StartTick);
+	 StartMark.Label = FString::Printf(TEXT("s:%s"), *GlossLabel);
+	 MovieScene->AddMarkedFrame(StartMark);
+
+	 FMovieSceneMarkedFrame EndMark(EndTick);
+	 EndMark.Label = FString::Printf(TEXT("e:%s"), *GlossLabel);
+	 MovieScene->AddMarkedFrame(EndMark);
+
+
+	 TArray<FMovieSceneMarkedFrame> Markers = { StartMark, EndMark };
+	 return Markers;
+ }
+
+void UVTTParser::UpdateVTTEntryFrames(UPARAM(ref) FVTTEntry& Entry, const FFrameRate FrameRate)
 {
-	if (!Section || !Animation)
-	{
-		return;
-	}
+    const float StartTime = Entry.StartTimeSeconds;
+    const float EndTime = Entry.EndTimeSeconds;
 
-	Section->Params.Animation = Animation;
-	Section->Modify(true);
+    const FFrameNumber StartFrame = GetFrameFromSeconds(FrameRate, StartTime);
+    const FFrameNumber EndFrame = GetFrameFromSeconds(FrameRate, EndTime);
 
-	return;
-}
-
-FSectionLabelEntry UVTTParser::CreateSectionLabelEntry(
-	UMovieSceneSection* Section,
-	const FString& Label)
-{
-	FSectionLabelEntry Entry;
-
-	Entry.Section = Section;
-	Entry.Label = Label;
-
-	return Entry;
+    Entry.StartFrame = StartFrame;
+    Entry.EndFrame = EndFrame;
 }
 
 float UVTTParser::ConvertVTTTimestampToSeconds(const FString& Timestamp)

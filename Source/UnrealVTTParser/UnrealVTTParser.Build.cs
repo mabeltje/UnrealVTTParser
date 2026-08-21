@@ -29,7 +29,8 @@ public class UnrealVTTParser : ModuleRules
                 "CoreUObject",
                 "Engine",
 				"MovieScene",
-                "MovieSceneTracks"
+                "MovieSceneTracks",
+		        "LevelSequence"
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);

@@ -2,11 +2,12 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "MovieSceneSection.h"
+#include "MovieScene.h"
+#include "LevelSequence.h"
 #include "VTTParser.generated.h"
 
-class UMovieSceneSkeletalAnimationSection; // Forward declaration
 
+// Represents a single parsed entry from a .vtt file 
 USTRUCT(BlueprintType)
 struct FVTTEntry
 {
@@ -28,18 +29,6 @@ struct FVTTEntry
 	FFrameNumber EndFrame;
 };
 
-USTRUCT(BlueprintType)
-struct FSectionLabelEntry
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VTT")
-	TObjectPtr<UMovieSceneSection> Section = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VTT")
-	FString Label;
-};
-
 UCLASS()
 class UNREALVTTPARSER_API UVTTParser : public UBlueprintFunctionLibrary
 {
@@ -50,21 +39,16 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "VTT Processing")
 	static bool ParseVTTFile(const FString& FilePath, TArray<FVTTEntry>& OutMarkers);
 
+	// Converts a timestamp into a frame number based on the given frame rate
 	UFUNCTION(BlueprintCallable, Category = "VTT Processing")
 	static FFrameNumber GetFrameFromSeconds(const FFrameRate FrameRate, float Seconds);
 
-	/** Pairs sections with corresponding labels into a list of structs */
+	// Updates the frame numbers for a VTT entry based on the given frame rate
 	UFUNCTION(BlueprintCallable, Category = "VTT Processing")
-	static FSectionLabelEntry CreateSectionLabelEntry(
-		UMovieSceneSection* Section,
-		const FString& Label
-	);
+	static void UpdateVTTEntryFrames(UPARAM(ref) FVTTEntry& Entry, const FFrameRate FrameRate);
 
 	UFUNCTION(BlueprintCallable, Category = "VTT Processing")
-	static void SetAnimationAsset(
-		UMovieSceneSkeletalAnimationSection* Section,
-		UAnimSequenceBase* Animation
-	);
+    static TArray<FMovieSceneMarkedFrame> AddVTTEntryMarkers(ULevelSequence* Sequence, const FFrameNumber StartFrame, const FFrameNumber EndFrame, const FString& GlossLabel);
 
 private:
 	static float ConvertVTTTimestampToSeconds(const FString& Timestamp);
